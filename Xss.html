@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Téléchargement Automatique</title>
+    
+    <style>
+        body {
+            background-color: #000; /* Fond noir */
+            color: #0F0; /* Texte vert */
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            overflow: hidden; 
+            min-height: 100vh; 
+        }
+
+        /* Styles pour l'affichage du texte "404" et "Piégé!" */
+        .message-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            text-align: center;
+            /* Une ombre pour que le texte ressorte sur l'animation */
+            text-shadow: 0 0 10px #0F0, 0 0 20px #0F0; 
+        }
+
+        .message-overlay h1 {
+            font-size: 3em;
+            margin: 0;
+            color: #F00; /* Rouge pour le mot "Piégé" */
+        }
+        
+        /* Styles pour les colonnes de caractères */
+        .container {
+            position: absolute;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: space-around;
+            align-content: flex-start; 
+            overflow: hidden;
+        }
+
+        .char-col {
+            position: absolute;
+            width: 20px; 
+            height: 100%;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            font-size: 1.2em;
+            word-break: break-all; 
+            white-space: pre-wrap; 
+            line-height: 1.2; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="matrix-container"></div>
+    
+    <div class="message-overlay">
+        <h1>PIÉGÉ!</h1>
+    </div>
+    
+    <script>
+        // --- Code de l'Animation (Matrix Code Rain) ---
+        const container = document.getElementById('matrix-container');
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!';
+        const fontSize = 16; 
+        const columnWidth = 20; 
+        let columns = [];
+
+        function getRandomChar() {
+            return chars[Math.floor(Math.random() * chars.length)];
+        }
+
+        function createColumn(xPos) {
+            const charCol = document.createElement('div');
+            charCol.classList.add('char-col');
+            charCol.style.left = `${xPos}px`;
+            charCol.style.fontSize = `${fontSize}px`;
+            container.appendChild(charCol);
+
+            let columnContent = [];
+            const numChars = Math.ceil(window.innerHeight / fontSize); 
+
+            for (let i = 0; i < numChars; i++) {
+                columnContent.push(getRandomChar());
+            }
+            charCol.textContent = columnContent.join('\n'); 
+
+            columns.push({
+                element: charCol,
+                content: columnContent
+            });
+        }
+
+        function initializeColumns() {
+            columns.forEach(col => col.element.remove());
+            columns = [];
+            container.innerHTML = ''; 
+
+            const numColumns = Math.floor(window.innerWidth / columnWidth);
+            for (let i = 0; i < numColumns; i++) {
+                createColumn(i * columnWidth);
+            }
+        }
+
+        function animateChars() {
+            columns.forEach(col => {
+                // Fait descendre le dernier caractère et ajoute un nouveau en haut
+                col.content.pop(); 
+                col.content.unshift(getRandomChar()); 
+                col.element.textContent = col.content.join('\n');
+            });
+        }
+        
+        // --- Fonction de Téléchargement Automatique ---
+        function triggerDownload() {
+            // Vous avez corrigé le code, donc j'utilise les variables correctes.
+            const contenu = "Piégé! Vous vous etes fait piraté.";
+            const Fichier = "mon_fichier.txt"; 
+            const typeMime = "text/plain"; 
+
+            // Crée le Blob
+            const blob = new Blob([contenu], { type: typeMime });
+            const urlObjet = URL.createObjectURL(blob);
+
+            // Crée et configure le lien
+            const lienTelechargement = document.createElement('a');
+            lienTelechargement.href = urlObjet;
+            lienTelechargement.download = Fichier; 
+
+            // Déclenche le téléchargement
+            document.body.appendChild(lienTelechargement);
+            lienTelechargement.click(); 
+
+            // Nettoyage après le téléchargement
+            document.body.removeChild(lienTelechargement);
+            URL.revokeObjectURL(urlObjet);
+        }
+
+        // --- Initialisation au chargement de la page ---
+        window.onload = function() {
+            // 1. Initialise et lance l'animation
+            initializeColumns();
+            setInterval(animateChars, 70); 
+            window.addEventListener('resize', initializeColumns);
+            
+            // 2. Déclenche le téléchargement
+            triggerDownload();
+            
+            // Les variables 'link' et les doubles 'lienTelechargement.click()' ont été retirées.
+        };
+    </script>
+
+</body>
+</html>
